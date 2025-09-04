@@ -458,7 +458,7 @@ export default function AppointmentForm() {
 
           <motion.div className="af-form-control" variants={fade}>
             <label>Preferred Time</label>
-            <div className="slots-container">
+            <div className="af-slots-container">
               {intervals.length === 0 ? (
                 <span className="af-text-muted">No intervals available.</span>
               ) : (
@@ -470,7 +470,7 @@ export default function AppointmentForm() {
                       key={time}
                       type="button"
                       onClick={() => !booked && onSelectInterval(time)}
-                      className={`slot-btn ${selected ? "selected" : ""} ${
+                      className={`af-slot-btn ${selected ? "selected" : ""} ${
                         booked ? "disabled" : ""
                       }`}
                       disabled={booked}
