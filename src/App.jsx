@@ -3,6 +3,7 @@ import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import Homepage from "./components/Homepage";
 import Policies from "./components/Policies";
+import AdminLogin from "./components/Admin/AdminLogin";
 
 const router = createBrowserRouter([
   {
@@ -15,9 +16,13 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
+    element: <AdminLogin />, // login page
+  },
+  {
+    path: "/admin",
     element: <AdminLayout />,
     children: [
-      { index: true, element: <div>Admin Dashboard</div> },
+      { path: "dashboard", element: <div>Admin Dashboard</div> },
       { path: "doctors", element: <div>Doctors Page</div> },
       { path: "appointments", element: <div>Appointments Page</div> },
       { path: "settings", element: <div>Settings Page</div> },

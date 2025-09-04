@@ -3,39 +3,6 @@
   min-height: 100vh;
 }
 
-.sb-root {
-  width: 240px;
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
-  padding: 1rem;
-}
-
-.sb-logo {
-  font-weight: 800;
-  margin-bottom: 1.5rem;
-}
-
-.sb-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.sb-nav a {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.8rem;
-  border-radius: 8px;
-  color: var(--color-text);
-  text-decoration: none;
-}
-
-.sb-nav a.active {
-  background: var(--color-primary);
-  color: #fff;
-}
-
 .admin-main {
   flex: 1;
   padding: 1.25rem;

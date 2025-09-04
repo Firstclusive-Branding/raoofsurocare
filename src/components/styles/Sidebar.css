@@ -1,0 +1,72 @@
+.sb-root {
+  width: 240px;
+  background: linear-gradient(
+    to top,
+    rgba(19, 164, 221, 0.6),
+    rgba(211, 31, 38, 0.4)
+  );
+  padding: 1rem;
+  border-radius: 20px;
+  margin: 1rem;
+  height: calc(100vh - 2rem);
+}
+
+.sb-logo {
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  height: 60px;
+  text-align: center;
+}
+
+.sb-logo img {
+  height: 100%;
+  object-fit: contain;
+}
+
+.sb-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+
+.sb-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sb-nav a:hover {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.sb-nav a.active {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+
+.sb-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.sb-logout:hover {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
