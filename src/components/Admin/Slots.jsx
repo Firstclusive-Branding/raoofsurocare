@@ -13,6 +13,11 @@ export default function Slots() {
   const [doctors, setDoctors] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [formData, setFormData] = useState({
     _id: "",
@@ -28,21 +33,29 @@ export default function Slots() {
   });
 
   // Fetch Slots
-  const fetchSlots = async () => {
+  const fetchSlots = async (search = "", page = currentPage) => {
     try {
+      setLoading(true);
       const res = await fetch(`${base_url}/api/admin/slotbooking`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pageno: 0,
+          pageno: page,
           sortby: { createdAt: "desc" },
-          search: "",
+          search,
         }),
       });
       const data = await res.json();
-      if (!data.error) setSlots(data.data.slotbooking);
+      if (!data.error) {
+        setSlots(data.data.slotbooking || []);
+        setTotalPages(data.data.totalPages || 1);
+      } else {
+        setSlots([]);
+      }
     } catch (err) {
       toast.error("Failed to fetch slots");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -59,16 +72,21 @@ export default function Slots() {
         }),
       });
       const data = await res.json();
-      if (!data.error) setDoctors(data.data.doctor);
+      if (!data.error) setDoctors(data.data.doctor || []);
     } catch (err) {
       toast.error("Failed to fetch doctors");
     }
   };
 
   useEffect(() => {
-    fetchSlots();
+    setCurrentPage(0);
+    fetchSlots(searchTerm, 0);
     fetchDoctors();
-  }, []);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    fetchSlots(searchTerm, currentPage);
+  }, [currentPage]);
 
   // Helpers
   const formatDate = (date) => {
@@ -149,7 +167,7 @@ export default function Slots() {
       if (!result.error) {
         toast.success(isEditing ? "Slot updated!" : "Slot created!");
         setModalOpen(false);
-        fetchSlots();
+        fetchSlots(searchTerm, currentPage);
       } else {
         toast.error(result.message || "Failed to save slot");
       }
@@ -181,7 +199,7 @@ export default function Slots() {
           const data = await response.json();
           if (!data.error) {
             toast.success("Slot deleted");
-            fetchSlots();
+            fetchSlots(searchTerm, currentPage);
           } else {
             toast.error("Failed to delete");
           }
@@ -210,40 +228,79 @@ export default function Slots() {
     <div className="slots-container">
       <div className="slots-header">
         <h2>Appointment Slots</h2>
-        <button onClick={() => openModal()}>+ Add Slot</button>
+        <div className="slots-search">
+          <input
+            type="text"
+            placeholder="Search by doctor or type..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button onClick={() => openModal()}>+ Add Slot</button>
+        </div>
       </div>
 
-      <table className="slots-table">
-        <thead>
-          <tr>
-            <th>Doctor</th>
-            <th>Date</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Type</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {slots.map((slot) => (
-            <tr key={slot._id}>
-              <td>{getDoctorName(slot.doctorid)}</td>
-              <td>{new Date(slot.date).toLocaleDateString()}</td>
-              <td>{slot.starttime}</td>
-              <td>{slot.endtime}</td>
-              <td>{slot.slottype}</td>
-              <td>
-                <FaEdit className="icon edit" onClick={() => openModal(slot)} />
-                <FaTrash
-                  className="icon delete"
-                  onClick={() => handleDelete(slot._id)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {loading ? (
+        <div className="slots-loading">Loading slots...</div>
+      ) : slots.length === 0 ? (
+        <p className="slots-empty">No slots found.</p>
+      ) : (
+        <>
+          <table className="slots-table">
+            <thead>
+              <tr>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {slots.map((slot) => (
+                <tr key={slot._id}>
+                  <td>{getDoctorName(slot.doctorid)}</td>
+                  <td>{new Date(slot.date).toLocaleDateString()}</td>
+                  <td>{slot.starttime}</td>
+                  <td>{slot.endtime}</td>
+                  <td>{slot.slottype}</td>
+                  <td>
+                    <FaEdit
+                      className="icon edit"
+                      onClick={() => openModal(slot)}
+                    />
+                    <FaTrash
+                      className="icon delete"
+                      onClick={() => handleDelete(slot._id)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
+          {/* Pagination */}
+          <div className="slots-pagination">
+            <button
+              disabled={currentPage === 0}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
+            >
+              Previous
+            </button>
+            <span>
+              Page {currentPage + 1} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage + 1 >= totalPages}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Modal */}
       {modalOpen && (
         <div className="slots-modal">
           <div className="slots-modal-content">

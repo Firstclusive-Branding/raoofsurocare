@@ -1,0 +1,254 @@
+.doctors-container {
+  padding: 1rem 0;
+  background: var(--color-bg);
+}
+
+.doctors-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 20px;
+}
+
+.doctors-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.doctors-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.doctors-search-wrapper input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s ease;
+  flex: 1;
+}
+
+.doctors-search-wrapper input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 4px rgba(11, 57, 84, 0.3);
+}
+
+.doctors-search-wrapper button {
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.doctors-search-wrapper button:hover {
+  background-color: var(--color-secondary);
+}
+
+.doctors-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.doctors-table th,
+.doctors-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.doctors-table th {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.doctors-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.doctors-table tr:hover {
+  background: #f1faff;
+}
+
+/* ================================
+   Icons
+================================ */
+.doctors-icon {
+  font-size: 1.1rem;
+  margin-right: 0.6rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.doctors-icon.edit {
+  color: var(--color-primary);
+}
+
+.doctors-icon.edit:hover {
+  color: var(--color-link-hover);
+}
+
+.doctors-icon.delete {
+  color: var(--color-secondary);
+}
+
+.doctors-icon.delete:hover {
+  color: #a50e13;
+}
+
+/* ================================
+   Modal
+================================ */
+.doctors-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.doctors-modal-content {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.doctors-modal-content h3 {
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ================================
+   Form
+================================ */
+.doctors-modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.doctors-modal-content input {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.doctors-modal-content input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(19, 164, 221, 0.2);
+}
+
+/* ================================
+   Form Buttons
+================================ */
+.doctors-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.doctors-modal-actions button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.doctors-modal-actions button[type="submit"] {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.doctors-modal-actions button[type="submit"]:hover {
+  background: var(--color-link-hover);
+}
+
+.doctors-modal-actions button[type="button"] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.doctors-modal-actions button[type="button"]:hover {
+  background: #ececec;
+}
+
+.doctors-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  font-size: 14px;
+}
+
+.doctors-pagination button {
+  background-color: #0b3954;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.doctors-pagination button:hover:not(:disabled) {
+  background-color: #082c42;
+  transform: translateY(-1px);
+}
+
+.doctors-pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.doctors-pagination span {
+  font-weight: 500;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .doctors-table th,
+  .doctors-table td {
+    padding: 0.65rem;
+    font-size: 0.85rem;
+  }
+
+  .doctors-modal-content {
+    width: 90%;
+    padding: 1.5rem;
+  }
+}

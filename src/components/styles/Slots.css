@@ -8,12 +8,39 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  gap: 1rem;
 }
 
 .slots-header h2 {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--color-text);
+}
+
+.slots-search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  /* width: 100%; */
+  flex: 1;
+}
+
+.slots-search input {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  min-width: 220px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  flex: 1;
+}
+
+.slots-search input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(19, 164, 221, 0.2);
 }
 
 .slots-header button {
@@ -190,6 +217,38 @@
   background: #ececec;
 }
 
+.slots-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.slots-pagination button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.slots-pagination button:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.slots-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 @media (max-width: 768px) {
   .slots-table th,
   .slots-table td {

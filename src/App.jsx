@@ -9,6 +9,7 @@ import Doctors from "./components/Admin/Doctors";
 import Appointments from "./components/Admin/Appointments";
 import Slots from "./components/Admin/Slots";
 import PatientRegistration from "./components/Admin/PatientRegistration";
+import { ToastContainer } from "react-toastify";
 
 const router = createBrowserRouter([
   {
@@ -37,5 +38,18 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        theme="colored"
+      />
+      <RouterProvider router={router} />
+    </>
+  );
 }
