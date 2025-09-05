@@ -3,9 +3,11 @@ import {
   FaHome,
   FaUserMd,
   FaCalendarCheck,
-  FaCog,
   FaSignOutAlt,
+  FaHeadSideMask,
 } from "react-icons/fa";
+import { FaRegClock } from "react-icons/fa";
+
 import "../styles/Sidebar.css";
 
 export default function Sidebar() {
@@ -13,7 +15,6 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     localStorage.removeItem("admin-auth");
-    // Trigger storage event manually for current tab
     window.dispatchEvent(new Event("storage"));
     navigate("/admin");
   };
@@ -27,15 +28,19 @@ export default function Sidebar() {
         <NavLink to="/admin/dashboard" end>
           <FaHome /> Dashboard
         </NavLink>
+        <NavLink to="/admin/patient-registration" end>
+          <FaHeadSideMask /> Patient Registration
+        </NavLink>
         <NavLink to="/admin/doctors">
           <FaUserMd /> Doctors
         </NavLink>
         <NavLink to="/admin/appointments">
           <FaCalendarCheck /> Appointments
         </NavLink>
-        <NavLink to="/admin/settings">
-          <FaCog /> Settings
+        <NavLink to="/admin/appointment-slots">
+          <FaRegClock /> Slots
         </NavLink>
+
         <button className="sb-logout" onClick={handleLogout}>
           <FaSignOutAlt /> Logout
         </button>

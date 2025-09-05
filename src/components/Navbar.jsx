@@ -59,27 +59,47 @@ export default function Navbar() {
 
         <ul className="nav-list">
           <li>
-            <Link to="https://drkhizarraoof.com/" onClick={closeMenu}>
+            <a
+              href="https://drkhizarraoof.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMenu}
+            >
               Dr. Khizar Raoof
-            </Link>
+            </a>
           </li>
           <li>
-            <Link to="https://drkhizarraoof.com/" onClick={closeMenu}>
+            <a
+              href="https://drkhizarraoof.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={closeMenu}
+            >
               Dr. Raoof's Urocare
-            </Link>
+            </a>
           </li>
         </ul>
         <div id="nav-menu" className={`nav-menu ${open ? "is-open" : ""}`}>
           <ul className="nav-list mobile">
             <li>
-              <Link to="https://drkhizarraoof.com/" onClick={closeMenu}>
+              <a
+                href="https://drkhizarraoof.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={closeMenu}
+              >
                 Dr. Khizar Raoof
-              </Link>
+              </a>
             </li>
             <li>
-              <Link to="https://drkhizarraoof.com/" onClick={closeMenu}>
+              <a
+                href="https://drkhizarraoof.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={closeMenu}
+              >
                 Dr. Raoof's Urocare
-              </Link>
+              </a>
             </li>
           </ul>
 

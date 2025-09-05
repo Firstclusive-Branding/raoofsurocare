@@ -4,6 +4,11 @@ import AdminLayout from "./layouts/AdminLayout";
 import Homepage from "./components/Homepage";
 import Policies from "./components/Policies";
 import AdminLogin from "./components/Admin/AdminLogin";
+import Dashboard from "./components/Admin/Dashboard";
+import Doctors from "./components/Admin/Doctors";
+import Appointments from "./components/Admin/Appointments";
+import Slots from "./components/Admin/Slots";
+import PatientRegistration from "./components/Admin/PatientRegistration";
 
 const router = createBrowserRouter([
   {
@@ -16,16 +21,17 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <AdminLogin />, // login page
+    element: <AdminLogin />,
   },
   {
     path: "/admin",
     element: <AdminLayout />,
     children: [
-      { path: "dashboard", element: <div>Admin Dashboard</div> },
-      { path: "doctors", element: <div>Doctors Page</div> },
-      { path: "appointments", element: <div>Appointments Page</div> },
-      { path: "settings", element: <div>Settings Page</div> },
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "doctors", element: <Doctors /> },
+      { path: "appointments", element: <Appointments /> },
+      { path: "appointment-slots", element: <Slots /> },
+      { path: "patient-registration", element: <PatientRegistration /> },
     ],
   },
 ]);

@@ -1,4 +1,3 @@
-// src/components/AppointmentForm.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import Swal from "sweetalert2";
@@ -8,7 +7,6 @@ import "../styles/AppointmentForm.css";
 const base_url = import.meta.env.VITE_PUBLIC_API_URL;
 const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
-// Load Razorpay script safely
 async function loadRazorpay() {
   if (window.Razorpay) return true;
   return new Promise((resolve) => {
@@ -63,18 +61,24 @@ export default function AppointmentForm() {
       .replace("am", "AM")
       .replace("pm", "PM");
 
-  const generateIntervals = (start, end) => {
+  const generateIntervals = (start, end, date) => {
     const out = [];
     const s = parseTime(start);
     const e = parseTime(end);
+
+    const now = new Date();
+
+    const isToday = date === today;
+
     while (s < e) {
-      out.push(formatTime(s));
+      if (!isToday || s > now) {
+        out.push(formatTime(s));
+      }
       s.setMinutes(s.getMinutes() + 7);
     }
     setIntervals(out);
   };
 
-  // Fetch doctors
   useEffect(() => {
     (async () => {
       try {
@@ -93,7 +97,6 @@ export default function AppointmentForm() {
     })();
   }, [base_url]);
 
-  // Fetch booked appointments for doctor/date
   const fetchBookedAppointments = async (doctorid, date) => {
     try {
       const res = await fetch(
@@ -133,7 +136,8 @@ export default function AppointmentForm() {
             slotid: slot._id,
             slottype: slot.slottype,
           }));
-          generateIntervals(slot.starttime, slot.endtime);
+          generateIntervals(slot.starttime, slot.endtime, form.date);
+
           setMessage("");
           await fetchBookedAppointments(form.doctorid, form.date);
         } else {
