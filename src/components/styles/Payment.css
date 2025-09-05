@@ -1,0 +1,182 @@
+.payment-container {
+  padding: 1rem 0;
+  background: var(--color-bg);
+}
+
+/* Header + Search */
+.payment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.payment-heading {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.payment-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.payment-search input {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.payment-search input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(19, 164, 221, 0.2);
+}
+
+/* Loading & Empty States */
+.payment-loading,
+.payment-empty {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1rem;
+  color: var(--color-text-light);
+}
+
+/* Table */
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.payment-table th,
+.payment-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.payment-table th {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.payment-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.payment-table tr:hover {
+  background: #f1faff;
+}
+
+/* Status Badges */
+.payment-status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 5px;
+  text-transform: capitalize;
+  color: #fff;
+}
+
+.payment-status-badge.paid {
+  background: #28a745;
+}
+
+.payment-status-badge.unpaid {
+  background: #dc3545;
+}
+
+.payment-status-badge.pending {
+  background: #f0ad4e;
+}
+
+/* Delete Button */
+.payment-delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-secondary);
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.payment-delete-btn:hover {
+  color: #a50e13;
+}
+
+/* Pagination */
+.payment-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.payment-pagination button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payment-pagination button:hover:not(:disabled) {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.payment-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .payment-table {
+    font-size: 0.85rem;
+  }
+
+  .payment-table th,
+  .payment-table td {
+    padding: 0.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .payment-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .payment-table th,
+  .payment-table td {
+    font-size: 0.8rem;
+  }
+}

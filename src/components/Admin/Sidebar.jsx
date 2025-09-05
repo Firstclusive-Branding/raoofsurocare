@@ -5,6 +5,7 @@ import {
   FaCalendarCheck,
   FaSignOutAlt,
   FaHeadSideMask,
+  FaCreditCard,
 } from "react-icons/fa";
 import { FaRegClock } from "react-icons/fa";
 
@@ -22,7 +23,9 @@ export default function Sidebar() {
   return (
     <aside className="sb-root">
       <h2 className="sb-logo">
-        <img src="/assets/navbar/logo.png" alt="Urocare Admin" />
+        <a href="/">
+          <img src="/assets/navbar/logo.png" alt="Urocare Admin" />
+        </a>
       </h2>
       <nav className="sb-nav">
         <NavLink to="/admin/dashboard" end>
@@ -34,11 +37,14 @@ export default function Sidebar() {
         <NavLink to="/admin/doctors">
           <FaUserMd /> Doctors
         </NavLink>
+        <NavLink to="/admin/appointment-slots">
+          <FaRegClock /> Slots
+        </NavLink>
         <NavLink to="/admin/appointments">
           <FaCalendarCheck /> Appointments
         </NavLink>
-        <NavLink to="/admin/appointment-slots">
-          <FaRegClock /> Slots
+        <NavLink to="/admin/payment">
+          <FaCreditCard /> Payment
         </NavLink>
 
         <button className="sb-logout" onClick={handleLogout}>
