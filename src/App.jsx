@@ -8,10 +8,10 @@ import Dashboard from "./components/Admin/Dashboard";
 import Doctors from "./components/Admin/Doctors";
 import Appointments from "./components/Admin/Appointments";
 import Slots from "./components/Admin/Slots";
-import PatientRegistration from "./components/Admin/PatientRegistration";
 import { ToastContainer } from "react-toastify";
 import Payment from "./components/Admin/Payment";
 import AdminPolicies from "./components/Admin/AdminPolicies";
+import Patient from "./components/Admin/Patient";
 
 const router = createBrowserRouter([
   {
@@ -35,7 +35,7 @@ const router = createBrowserRouter([
       { path: "appointments", element: <Appointments /> },
       { path: "appointment-slots", element: <Slots /> },
       { path: "payment", element: <Payment /> },
-      { path: "patient-registration", element: <PatientRegistration /> },
+      { path: "patients", element: <Patient /> },
       { path: "policies", element: <AdminPolicies /> },
     ],
   },

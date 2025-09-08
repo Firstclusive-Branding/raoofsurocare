@@ -32,8 +32,8 @@ export default function Sidebar() {
         <NavLink to="/admin/dashboard" end>
           <FaHome /> Dashboard
         </NavLink>
-        <NavLink to="/admin/patient-registration" end>
-          <FaHeadSideMask /> Patient Registration
+        <NavLink to="/admin/patients" end>
+          <FaHeadSideMask /> Patients
         </NavLink>
         <NavLink to="/admin/doctors">
           <FaUserMd /> Doctors

@@ -88,21 +88,21 @@ export default function PatientRegistration() {
   };
 
   const fields = [
-    ["name", "Patient Name *"],
-    ["mobile", "Mobile *"],
-    ["sex", "Sex"],
-    ["age", "Age"],
-    ["email", "Email"],
-    ["area", "Area"],
-    ["referrallab", "Referral Lab"],
-    ["height", "Height (cm)"],
-    ["materialstatus", "Marital Status"],
-    ["occupation", "Occupation"],
-    ["pincode", "Pincode"],
-    ["weight", "Weight (kg)"],
-    ["image", "Profile Image"],
-    ["bloodgroup", "Blood Group"],
-    ["dateofbirth", "Date of Birth"],
+    ["name", "Patient Name", "Enter Patient Name *"],
+    ["mobile", "Mobile", "Enter Mobile Number *"],
+    ["sex", "Sex", "Select Sex"],
+    ["age", "Age", "Enter Age"],
+    ["email", "Email", "Enter Email Address"],
+    ["area", "Area", "Enter Area"],
+    ["referrallab", "Referral Lab", "Enter Referral Lab"],
+    ["height", "Height (cm)", "Enter Height in cm"],
+    ["materialstatus", "Marital Status", "Select Marital Status"],
+    ["occupation", "Occupation", "Enter Occupation"],
+    ["pincode", "Pincode", "Enter Pincode"],
+    ["weight", "Weight (kg)", "Enter Weight in kg"],
+    ["image", "Profile Image", "Upload Profile Image"],
+    ["bloodgroup", "Blood Group", "Select Blood Group"],
+    ["dateofbirth", "Date of Birth", "Select Date of Birth"],
   ];
 
   return (
@@ -110,21 +110,60 @@ export default function PatientRegistration() {
       <h2>Patient Registration</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-grid">
-          {fields.map(([n, ph]) => (
-            <input
-              key={n}
-              type={
-                ["age", "height", "weight"].includes(n)
-                  ? "number"
-                  : n === "dateofbirth"
-                  ? "date"
-                  : "text"
-              }
-              name={n}
-              placeholder={ph}
-              value={formData[n]}
-              onChange={handleChange}
-            />
+          {fields.map(([n, t, ph]) => (
+            <div key={n} className="form-field">
+              <label htmlFor={n}>{t}</label>
+
+              {n === "sex" ? (
+                <div className="patient-radio-group">
+                  <label>
+                    <input
+                      type="radio"
+                      name={n}
+                      value="male"
+                      checked={formData[n] === "male"}
+                      onChange={handleChange}
+                    />
+                    Male
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name={n}
+                      value="female"
+                      checked={formData[n] === "female"}
+                      onChange={handleChange}
+                    />
+                    Female
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name={n}
+                      value="other"
+                      checked={formData[n] === "other"}
+                      onChange={handleChange}
+                    />
+                    Other
+                  </label>
+                </div>
+              ) : (
+                <input
+                  id={n}
+                  type={
+                    ["age", "height", "weight"].includes(n)
+                      ? "number"
+                      : n === "dateofbirth"
+                      ? "date"
+                      : "text"
+                  }
+                  name={n}
+                  placeholder={ph}
+                  value={formData[n]}
+                  onChange={handleChange}
+                />
+              )}
+            </div>
           ))}
         </div>
 

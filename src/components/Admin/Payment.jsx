@@ -14,7 +14,6 @@ export default function Payment() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch payments
   const fetchPayments = async (search = "", page = currentPage) => {
     try {
       setLoading(true);
