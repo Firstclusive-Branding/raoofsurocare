@@ -4,6 +4,15 @@
   color: var(--color-text);
 }
 
+.pp-item {
+  margin-left: 1rem;
+  line-height: 2;
+}
+
+.pp-item .pp-list-item {
+  margin-left: 1rem;
+}
+
 .pp-inner {
   max-width: 900px;
   margin: 0 auto;

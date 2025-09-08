@@ -52,13 +52,8 @@ export default function Doctors() {
   };
 
   useEffect(() => {
-    setCurrentPage(0);
-    fetchDoctors(searchTerm, 0);
-  }, [searchTerm]);
-
-  useEffect(() => {
     fetchDoctors(searchTerm, currentPage);
-  }, [currentPage]);
+  }, [searchTerm, currentPage]);
 
   const openModal = (doctor = null) => {
     if (doctor) {
@@ -153,8 +148,12 @@ export default function Doctors() {
             type="text"
             placeholder="Search doctors..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(0);
+            }}
           />
+
           <button onClick={() => openModal()}>Add Doctor +</button>
         </div>
       </div>

@@ -143,9 +143,9 @@ const Appointments = () => {
                   </td>
                   <td>
                     <span
-                      className={`appointment-payment-badge ${appt.paymentStatus}`}
+                      className={`appointment-payment-badge ${appt.paymentstatus}`}
                     >
-                      {appt.paymentStatus}
+                      {appt.paymentstatus}
                     </span>
                   </td>
                   <td>{new Date(appt.createdAt).toLocaleString()}</td>

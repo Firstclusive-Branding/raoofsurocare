@@ -8,6 +8,7 @@ import {
   FaCreditCard,
 } from "react-icons/fa";
 import { FaRegClock } from "react-icons/fa";
+import { MdOutlinePrivacyTip } from "react-icons/md";
 
 import "../styles/Sidebar.css";
 
@@ -45,6 +46,9 @@ export default function Sidebar() {
         </NavLink>
         <NavLink to="/admin/payment">
           <FaCreditCard /> Payment
+        </NavLink>
+        <NavLink to="/admin/policies">
+          <MdOutlinePrivacyTip /> Privacy Policy
         </NavLink>
 
         <button className="sb-logout" onClick={handleLogout}>

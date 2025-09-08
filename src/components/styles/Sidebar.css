@@ -9,6 +9,7 @@
   border-radius: 20px;
   margin: 1rem;
   height: calc(100vh - 2rem);
+  position: fixed;
 }
 
 .sb-logo {

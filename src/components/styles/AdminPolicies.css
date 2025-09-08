@@ -1,0 +1,253 @@
+.policies-container {
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: inherit;
+  color: var(--color-text);
+}
+
+.policies-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.policies-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.policies-btn-add-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.3s ease;
+}
+
+.policies-btn-add-section:hover {
+  background: var(--color-link-hover);
+}
+
+/* Section */
+.policies-section {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: var(--color-surface);
+}
+
+.policies-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.policies-section-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.policies-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.policies-btn-rename {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.policies-btn-rename:hover {
+  background: var(--color-border);
+}
+
+.policies-btn-delete {
+  background: var(--color-secondary);
+  color: #fff;
+}
+
+.policies-btn-delete:hover {
+  background: #b51a20;
+}
+
+.policies-btn-add {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.policies-btn-add:hover {
+  background: var(--color-link-hover);
+}
+
+/* Items */
+.policies-item {
+  border-top: 1px solid var(--color-border);
+  padding: 0.8rem 0;
+}
+
+.policies-item:first-of-type {
+  border-top: none;
+}
+
+.policies-item-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  color: var(--color-text);
+}
+
+.policies-item-desc {
+  margin-bottom: 0.6rem;
+  color: var(--color-text-light);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.policies-item-desc p {
+  margin: 0.3rem 0;
+}
+
+.policies-item-desc li {
+  margin-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.policies-item-actions {
+  display: flex;
+  gap: 0.7rem;
+  font-size: 1.1rem;
+  color: var(--color-text-light);
+}
+
+.policies-item-actions svg {
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.policies-item-actions svg:hover {
+  color: var(--color-primary);
+}
+
+/* Modal */
+.policies-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.policies-modal {
+  background: var(--color-bg);
+  padding: 2rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 700px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.policies-modal h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.policies-input,
+.policies-textarea {
+  width: 100%;
+  padding: 0.7rem;
+  margin: 0.6rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border 0.2s ease;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+.policies-input:focus,
+.policies-textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.policies-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.policies-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.policies-btn-save {
+  background: var(--color-primary);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.policies-btn-save:hover {
+  background: var(--color-link-hover);
+}
+
+.policies-btn-cancel {
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.policies-btn-cancel:hover {
+  background: var(--color-border);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

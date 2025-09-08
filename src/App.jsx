@@ -11,6 +11,7 @@ import Slots from "./components/Admin/Slots";
 import PatientRegistration from "./components/Admin/PatientRegistration";
 import { ToastContainer } from "react-toastify";
 import Payment from "./components/Admin/Payment";
+import AdminPolicies from "./components/Admin/AdminPolicies";
 
 const router = createBrowserRouter([
   {
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { path: "appointment-slots", element: <Slots /> },
       { path: "payment", element: <Payment /> },
       { path: "patient-registration", element: <PatientRegistration /> },
+      { path: "policies", element: <AdminPolicies /> },
     ],
   },
 ]);
