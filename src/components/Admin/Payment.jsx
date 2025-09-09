@@ -128,17 +128,19 @@ export default function Payment() {
                   <tr key={pay._id}>
                     <td>{idx + 1 + currentPage * 10}</td>
                     <td>
-                      <div>{pay.appointmentid?.patientname}</div>
-                      <div className="text-xs text-gray-500">
-                        Phone: {pay.appointmentid?.patientmobile}
+                      <div>
+                        {pay.patientid?.name || pay.appointmentid?.patientname}
+                      </div>
+                      <div>
+                        Phone:{" "}
+                        {pay.patientid?.mobile ||
+                          pay.appointmentid?.patientmobile}
                       </div>
                     </td>
                     <td>
                       {pay.doctorid?.name}
                       <br />
-                      <span className="text-xs text-gray-500">
-                        {pay.doctorid?.specialization}
-                      </span>
+                      <span>{pay.doctorid?.specialization}</span>
                     </td>
                     <td>
                       {new Date(pay.appointmentid?.date).toLocaleDateString()}

@@ -92,6 +92,7 @@
   border-radius: 5px;
   text-transform: capitalize;
   color: #fff;
+  background: #f0ad4e;
 }
 
 .payment-status-badge.paid {

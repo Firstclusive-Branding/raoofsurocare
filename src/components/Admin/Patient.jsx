@@ -144,31 +144,99 @@ export default function Patient() {
     })();
   }, []);
 
+  // useEffect(() => {
+  //   (async () => {
+  //     if (!appointmentForm.doctorid || !appointmentForm.date) return;
+  //     const res = await fetch(
+  //       `${base_url}/api/user/slotbooking/${appointmentForm.doctorid}?date=${appointmentForm.date}`
+  //     );
+  //     const data = await res.json();
+  //     if (!data.error && data.data?.length) {
+  //       const slot = data.data[0];
+  //       setAppointmentForm((prev) => ({ ...prev, slotid: slot._id }));
+  //       generateIntervals(slot.starttime, slot.endtime, appointmentForm.date);
+
+  //       const bookedRes = await fetch(
+  //         `${base_url}/api/user/appointment?doctorid=${appointmentForm.doctorid}&date=${appointmentForm.date}`
+  //       );
+  //       const bookedData = await bookedRes.json();
+  //       if (!bookedData.error && bookedData.data?.appointments) {
+  //         const times = bookedData.data.appointments.map((appt) =>
+  //           formatTime(parseTime(appt.starttime))
+  //         );
+  //         setBookedTimes(times);
+  //       }
+  //     }
+  //   })();
+  // }, [appointmentForm.doctorid, appointmentForm.date]);
+
   useEffect(() => {
     (async () => {
-      if (!appointmentForm.doctorid || !appointmentForm.date) return;
-      const res = await fetch(
-        `${base_url}/api/user/slotbooking/${appointmentForm.doctorid}?date=${appointmentForm.date}`
-      );
-      const data = await res.json();
-      if (!data.error && data.data?.length) {
-        const slot = data.data[0];
-        setAppointmentForm((prev) => ({ ...prev, slotid: slot._id }));
-        generateIntervals(slot.starttime, slot.endtime, appointmentForm.date);
+      if (!appointmentForm.doctorid || !appointmentForm.date) {
+        setIntervals([]);
+        setBookedTimes([]);
+        return;
+      }
 
-        const bookedRes = await fetch(
-          `${base_url}/api/user/appointment?doctorid=${appointmentForm.doctorid}&date=${appointmentForm.date}`
+      try {
+        const res = await fetch(
+          `${base_url}/api/user/slotbooking/${appointmentForm.doctorid}?date=${appointmentForm.date}`
         );
-        const bookedData = await bookedRes.json();
-        if (!bookedData.error && bookedData.data?.appointments) {
-          const times = bookedData.data.appointments.map((appt) =>
-            formatTime(parseTime(appt.starttime))
+        const data = await res.json();
+
+        if (!data.error && data.data?.length) {
+          const slot = data.data[0];
+          setAppointmentForm((prev) => ({ ...prev, slotid: slot._id }));
+          generateIntervals(slot.starttime, slot.endtime, appointmentForm.date);
+
+          // fetch booked appointments
+          const bookedRes = await fetch(
+            `${base_url}/api/user/appointment?doctorid=${appointmentForm.doctorid}&date=${appointmentForm.date}`
           );
-          setBookedTimes(times);
+          const bookedData = await bookedRes.json();
+          if (!bookedData.error && bookedData.data?.appointments) {
+            const times = bookedData.data.appointments.map((appt) =>
+              formatTime(parseTime(appt.starttime))
+            );
+            setBookedTimes(times);
+          } else {
+            setBookedTimes([]);
+          }
+        } else {
+          // 🟢 Reset slots if none found
+          setIntervals([]);
+          setBookedTimes([]);
         }
+      } catch (err) {
+        console.error(err);
+        setIntervals([]);
+        setBookedTimes([]);
       }
     })();
   }, [appointmentForm.doctorid, appointmentForm.date]);
+
+  // const handleBookAppointment = async () => {
+  //   try {
+  //     const res = await fetch(`${base_url}/api/admin/appointment/create`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(appointmentForm),
+  //     });
+  //     const data = await res.json();
+  //     if (!data.error) {
+  //       Swal.fire("Success", "Appointment booked successfully!", "success");
+  //       setAppointmentModalOpen(false);
+  //     } else {
+  //       Swal.fire(
+  //         "Error",
+  //         data.message || "Failed to book appointment",
+  //         "error"
+  //       );
+  //     }
+  //   } catch (err) {
+  //     Swal.fire("Error", "Server error, try again later.", "error");
+  //   }
+  // };
 
   const handleBookAppointment = async () => {
     try {
@@ -178,9 +246,36 @@ export default function Patient() {
         body: JSON.stringify(appointmentForm),
       });
       const data = await res.json();
+
       if (!data.error) {
-        Swal.fire("Success", "Appointment booked successfully!", "success");
-        setAppointmentModalOpen(false);
+        const appointmentId = data.data._id;
+
+        const payRes = await fetch(`${base_url}/api/admin/payment/create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            appointmentid: appointmentId,
+            amount: appointmentForm.amount || 700,
+            // method: appointmentForm.method || "cash",
+            patientid: appointmentForm.patientid,
+          }),
+        });
+        const payData = await payRes.json();
+
+        if (!payData.error) {
+          Swal.fire(
+            "Success",
+            "Appointment & Payment saved successfully!",
+            "success"
+          );
+          setAppointmentModalOpen(false);
+        } else {
+          Swal.fire(
+            "Payment Error",
+            payData.message || "Payment failed",
+            "error"
+          );
+        }
       } else {
         Swal.fire(
           "Error",
@@ -813,7 +908,9 @@ export default function Patient() {
             <label>Time Slot</label>
             <div className="slots">
               {intervals.length === 0 ? (
-                <span>No slots</span>
+                <span className="no-slots">
+                  No slots available on this date
+                </span>
               ) : (
                 intervals.map((time) => {
                   const selected = appointmentForm.starttime === time;
@@ -840,6 +937,18 @@ export default function Patient() {
                 })
               )}
             </div>
+
+            <label>Amount</label>
+            <input
+              type="number"
+              value={appointmentForm.amount || 700}
+              onChange={(e) =>
+                setAppointmentForm((prev) => ({
+                  ...prev,
+                  amount: e.target.value,
+                }))
+              }
+            />
 
             <div className="modal-actions">
               <button type="button" onClick={handleBookAppointment}>

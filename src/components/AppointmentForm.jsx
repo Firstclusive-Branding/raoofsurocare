@@ -194,11 +194,11 @@ export default function AppointmentForm() {
 
     const options = {
       key: razorpayKey,
-      amount: orderData.amount, // in paise from backend order
+      amount: orderData.amount,
       currency: "INR",
       name: "Doctor Appointment",
       description: "Booking Fee",
-      order_id: orderData.orderId, // backend-created Razorpay order id
+      order_id: orderData.orderId,
       handler: async function (response) {
         try {
           const verifyRes = await fetch(`${base_url}/api/user/payment/verify`, {
@@ -219,7 +219,8 @@ export default function AppointmentForm() {
               icon: "success",
               confirmButtonText: "OK",
             });
-            // Reset form
+            await fetchBookedAppointments(form.doctorid, form.date);
+
             setForm((f) => ({
               ...f,
               name: "",
@@ -229,7 +230,6 @@ export default function AppointmentForm() {
               slotid: "",
               starttime: "",
               endtime: "",
-              // keep doctor & slottype as-is
             }));
           } else {
             Swal.fire({
@@ -252,7 +252,7 @@ export default function AppointmentForm() {
         email: form.email,
         contact: form.phone,
       },
-      theme: { color: "#13a4dd" }, // your primary
+      theme: { color: "#13a4dd" },
     };
 
     const rzp = new window.Razorpay(options);
@@ -269,7 +269,6 @@ export default function AppointmentForm() {
 
     setSubmitting(true);
     try {
-      // 1) Create appointment
       const res = await fetch(`${base_url}/api/user/appointment/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
