@@ -23,6 +23,53 @@ export default function Patient() {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [newImageFile, setNewImageFile] = useState(null);
 
+  const [doctors, setDoctors] = useState([]);
+  const [intervals, setIntervals] = useState([]);
+  const [bookedTimes, setBookedTimes] = useState([]);
+  const today = new Date().toISOString().split("T")[0];
+  const [appointmentModalOpen, setAppointmentModalOpen] = useState(false);
+  const [appointmentForm, setAppointmentForm] = useState({
+    patientid: "",
+    doctorid: "",
+    date: today,
+    slotid: "",
+    starttime: "",
+    endtime: "",
+  });
+
+  const parseTime = (timeStr) => {
+    const [time, modifier] = timeStr.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+    const d = new Date();
+    d.setHours(hours, minutes, 0, 0);
+    return d;
+  };
+
+  const formatTime = (dateObj) =>
+    dateObj
+      .toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+      .replace("am", "AM")
+      .replace("pm", "PM");
+
+  const generateIntervals = (start, end, date) => {
+    const out = [];
+    const s = parseTime(start);
+    const e = parseTime(end);
+    const now = new Date();
+    const isToday = date === today;
+    while (s < e) {
+      if (!isToday || s > now) out.push(formatTime(s));
+      s.setMinutes(s.getMinutes() + 7);
+    }
+    setIntervals(out);
+  };
+
   function defaultForm() {
     return {
       _id: "",
@@ -89,6 +136,63 @@ export default function Patient() {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      const res = await fetch(`${base_url}/api/user/doctor/getall`);
+      const data = await res.json();
+      if (!data.error && data.data?.length) setDoctors(data.data);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (!appointmentForm.doctorid || !appointmentForm.date) return;
+      const res = await fetch(
+        `${base_url}/api/user/slotbooking/${appointmentForm.doctorid}?date=${appointmentForm.date}`
+      );
+      const data = await res.json();
+      if (!data.error && data.data?.length) {
+        const slot = data.data[0];
+        setAppointmentForm((prev) => ({ ...prev, slotid: slot._id }));
+        generateIntervals(slot.starttime, slot.endtime, appointmentForm.date);
+
+        const bookedRes = await fetch(
+          `${base_url}/api/user/appointment?doctorid=${appointmentForm.doctorid}&date=${appointmentForm.date}`
+        );
+        const bookedData = await bookedRes.json();
+        if (!bookedData.error && bookedData.data?.appointments) {
+          const times = bookedData.data.appointments.map((appt) =>
+            formatTime(parseTime(appt.starttime))
+          );
+          setBookedTimes(times);
+        }
+      }
+    })();
+  }, [appointmentForm.doctorid, appointmentForm.date]);
+
+  const handleBookAppointment = async () => {
+    try {
+      const res = await fetch(`${base_url}/api/admin/appointment/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(appointmentForm),
+      });
+      const data = await res.json();
+      if (!data.error) {
+        Swal.fire("Success", "Appointment booked successfully!", "success");
+        setAppointmentModalOpen(false);
+      } else {
+        Swal.fire(
+          "Error",
+          data.message || "Failed to book appointment",
+          "error"
+        );
+      }
+    } catch (err) {
+      Swal.fire("Error", "Server error, try again later.", "error");
+    }
+  };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !formData._id) return;
@@ -128,24 +232,37 @@ export default function Patient() {
 
   const handleImageDelete = async () => {
     if (!formData._id || !formData.image) return;
-    try {
-      const res = await fetch(`${base_url}/api/admin/patient/singleimage`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ _id: formData._id }),
-      });
 
-      const data = await res.json();
-      if (res.ok && !data.error) {
-        toast.success("Image deleted successfully");
-        setFormData((prev) => ({ ...prev, image: "" }));
-        fetchPatients();
-      } else {
-        toast.error(data.message || "Failed to delete image");
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This will permanently delete the image.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`${base_url}/api/admin/patient/singleimage`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ _id: formData._id }),
+          });
+
+          const data = await res.json();
+          if (res.ok && !data.error) {
+            Swal.fire("Deleted!", "Image has been deleted.", "success");
+            setFormData((prev) => ({ ...prev, image: "" }));
+            fetchPatients();
+          } else {
+            toast.error(data.message || "Failed to delete image");
+          }
+        } catch (err) {
+          toast.error("Error deleting image");
+        }
       }
-    } catch (err) {
-      toast.error("Error deleting image");
-    }
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -263,13 +380,21 @@ export default function Patient() {
       <div className="patients-header">
         <h2>Manage Patients</h2>
         <div className="patients-search-wrapper">
-          <input
-            type="text"
-            placeholder="Search patients..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button onClick={() => fetchPatients()}>Search</button>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              fetchPatients();
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Search patients..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button type="submit">Search</button>
+          </form>
+
           <button
             onClick={() => {
               setFormData(defaultForm());
@@ -302,7 +427,7 @@ export default function Patient() {
             {patients.length > 0 ? (
               patients.map((p) => (
                 <tr key={p._id}>
-                  <td>
+                  <td className="patient-table-img-wrapper">
                     <img
                       src={
                         p.image
@@ -322,34 +447,57 @@ export default function Patient() {
                   <td>{p.email}</td>
                   <td>{p.area}</td>
                   <td>
-                    <button
-                      type="button"
-                      className="full-details-button"
-                      onClick={() => openViewModal(p)}
-                    >
-                      View Full Details
-                    </button>
-                    <FaEdit
-                      className="action-btn edit"
-                      onClick={() => {
-                        const formattedDate = p.dateofbirth
-                          ? p.dateofbirth.split("T")[0]
-                          : "";
-                        const normalizedSex = p.sex ? p.sex.toLowerCase() : "";
-                        setFormData({
-                          ...p,
-                          dateofbirth: formattedDate,
-                          sex: normalizedSex,
-                        });
+                    <div className="patient-table-actions">
+                      <button
+                        type="button"
+                        className="full-details-button"
+                        onClick={() => {
+                          setAppointmentForm({
+                            patientid: p._id,
+                            doctorid: doctors.length > 0 ? doctors[0]._id : "",
+                            date: today,
+                            slotid: "",
+                            starttime: "",
+                            endtime: "",
+                          });
 
-                        setIsEditing(true);
-                        setModalOpen(true);
-                      }}
-                    />
-                    <FaTrash
-                      className="action-btn delete"
-                      onClick={() => handleDelete(p._id)}
-                    />
+                          setAppointmentModalOpen(true);
+                        }}
+                      >
+                        Book Appointment
+                      </button>
+
+                      <button
+                        type="button"
+                        className="full-details-button"
+                        onClick={() => openViewModal(p)}
+                      >
+                        View Full Details
+                      </button>
+                      <FaEdit
+                        className="action-btn edit"
+                        onClick={() => {
+                          const formattedDate = p.dateofbirth
+                            ? p.dateofbirth.split("T")[0]
+                            : "";
+                          const normalizedSex = p.sex
+                            ? p.sex.toLowerCase()
+                            : "";
+                          setFormData({
+                            ...p,
+                            dateofbirth: formattedDate,
+                            sex: normalizedSex,
+                          });
+
+                          setIsEditing(true);
+                          setModalOpen(true);
+                        }}
+                      />
+                      <FaTrash
+                        className="action-btn delete"
+                        onClick={() => handleDelete(p._id)}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))
@@ -384,10 +532,15 @@ export default function Patient() {
 
             <div className="image-edit-section">
               <div className="patient-modal-img-wrapper">
-                <div className="patient-img-overlay" />
+                {formData.image && !newImageFile && (
+                  <div className="patient-img-overlay" />
+                )}
+
                 <img
                   src={
-                    formData.image
+                    newImageFile
+                      ? URL.createObjectURL(newImageFile)
+                      : formData.image
                       ? formData.image
                       : formData.sex?.toLowerCase() === "female"
                       ? patientF
@@ -396,8 +549,7 @@ export default function Patient() {
                   alt="patient"
                   className="patient-modal-img"
                 />
-
-                {formData.image && (
+                {formData.image && !newImageFile && (
                   <FaTrash
                     className="image-delete-btn"
                     onClick={handleImageDelete}
@@ -515,6 +667,7 @@ export default function Patient() {
                     setModalOpen(false);
                     setFormData(defaultForm());
                     setIsEditing(false);
+                    setNewImageFile(null);
                   }}
                 >
                   Cancel
@@ -616,6 +769,87 @@ export default function Patient() {
                 }}
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {appointmentModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content appointment-modal">
+            <h3>Book Appointment</h3>
+
+            <label>Doctor</label>
+            <select
+              value={appointmentForm.doctorid}
+              onChange={(e) =>
+                setAppointmentForm((prev) => ({
+                  ...prev,
+                  doctorid: e.target.value,
+                }))
+              }
+            >
+              {doctors.map((doc) => (
+                <option key={doc._id} value={doc._id}>
+                  {doc.name}
+                </option>
+              ))}
+            </select>
+
+            <label>Date</label>
+            <input
+              type="date"
+              min={today}
+              value={appointmentForm.date}
+              onChange={(e) =>
+                setAppointmentForm((prev) => ({
+                  ...prev,
+                  date: e.target.value,
+                }))
+              }
+            />
+
+            <label>Time Slot</label>
+            <div className="slots">
+              {intervals.length === 0 ? (
+                <span>No slots</span>
+              ) : (
+                intervals.map((time) => {
+                  const selected = appointmentForm.starttime === time;
+                  const booked = bookedTimes.includes(time);
+                  return (
+                    <button
+                      key={time}
+                      type="button"
+                      disabled={booked}
+                      className={`slot-btn ${selected ? "selected" : ""}`}
+                      onClick={() => {
+                        const start = parseTime(time);
+                        const end = new Date(start.getTime() + 7 * 60000);
+                        setAppointmentForm((prev) => ({
+                          ...prev,
+                          starttime: formatTime(start),
+                          endtime: formatTime(end),
+                        }));
+                      }}
+                    >
+                      {time}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="modal-actions">
+              <button type="button" onClick={handleBookAppointment}>
+                Confirm
+              </button>
+              <button
+                type="button"
+                onClick={() => setAppointmentModalOpen(false)}
+              >
+                Cancel
               </button>
             </div>
           </div>

@@ -126,9 +126,10 @@ const Appointments = () => {
             <tbody>
               {appointments.map((appt) => (
                 <tr key={appt._id}>
-                  <td>{appt.patientname}</td>
-                  <td>{appt.patientmobile}</td>
-                  <td>{appt.patientemail}</td>
+                  <td>{appt.patientid?.name || appt.patientname}</td>
+                  <td>{appt.patientid?.mobile || appt.patientmobile}</td>
+                  <td>{appt.patientid?.email || appt.patientemail}</td>
+
                   <td>{appt.doctorid?.name}</td>
                   <td>{appt.doctorid?.specialization}</td>
                   <td>{new Date(appt.date).toLocaleDateString()}</td>

@@ -118,6 +118,7 @@ export default function Payment() {
                   <th>Time</th>
                   <th>Amount</th>
                   <th>Status</th>
+                  <th>Payment Type</th>
                   <th>Paid At</th>
                   <th>Action</th>
                 </tr>
@@ -154,6 +155,14 @@ export default function Payment() {
                         {pay.paymentstatus}
                       </span>
                     </td>
+                    {/* <td>{pay?.method || "Cash"}</td> */}
+                    <td>
+                      {pay?.method
+                        ? pay.method.charAt(0).toUpperCase() +
+                          pay.method.slice(1)
+                        : "Cash"}
+                    </td>
+
                     <td>{new Date(pay.paidAt).toLocaleString()}</td>
                     <td>
                       <button

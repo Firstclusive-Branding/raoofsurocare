@@ -7,6 +7,7 @@
 .patients-header {
   display: flex;
   justify-content: space-between;
+  gap: 1rem;
   align-items: center;
   margin-bottom: 1.5rem;
 }
@@ -17,9 +18,11 @@
   color: var(--color-primary);
 }
 
-.patients-search-wrapper {
+.patients-search-wrapper,
+.patients-search-wrapper form {
   display: flex;
   gap: 0.5rem;
+  flex: 1;
 }
 
 .patients-search-wrapper input {
@@ -27,6 +30,7 @@
   border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 0.95rem;
+  flex: 1;
 }
 
 .patients-search-wrapper button {
@@ -68,10 +72,24 @@
   background-color: #fafafa;
 }
 
-.patient-table-img {
+.patient-table-img-wrapper {
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  border: 2px solid var(--color-border);
-  max-width: 70px;
+  overflow: hidden;
+}
+
+.patient-table-img-wrapper img {
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.patient-table-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .full-details-button {
@@ -82,7 +100,6 @@
   color: #fff;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
 .action-btn {
@@ -331,4 +348,113 @@
   max-width: 150px;
   border-radius: 8px;
   border: 2px solid var(--color-border);
+}
+
+/* Appointment Modal */
+.appointment-modal h3 {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-align: center;
+}
+
+.appointment-modal label {
+  display: block;
+  margin: 0.6rem 0 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-light);
+}
+
+.appointment-modal select,
+.appointment-modal input[type="date"] {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.appointment-modal select:focus,
+.appointment-modal input[type="date"]:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(174, 245, 7, 0.3); /* glow */
+}
+
+/* Slots container */
+.appointment-modal .slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.appointment-modal .slot-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.appointment-modal .slot-btn:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.appointment-modal .slot-btn.selected {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.appointment-modal .slot-btn:disabled,
+.appointment-modal .slot-btn.disabled {
+  background: #ddd;
+  color: #888;
+  cursor: not-allowed;
+  border-color: #ccc;
+}
+
+/* Actions */
+.appointment-modal .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.appointment-modal .modal-actions button {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s;
+}
+
+.appointment-modal .modal-actions button:first-child {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.appointment-modal .modal-actions button:first-child:hover {
+  background: var(--color-link-hover);
+}
+
+.appointment-modal .modal-actions button:last-child {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.appointment-modal .modal-actions button:last-child:hover {
+  background: var(--color-border);
 }
