@@ -46,7 +46,6 @@ export default function Patient() {
     };
   }
 
-  // fetch patients
   const fetchPatients = async () => {
     try {
       setLoading(true);
@@ -90,7 +89,6 @@ export default function Patient() {
     }
   };
 
-  // image upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file || !formData._id) return;
@@ -128,7 +126,6 @@ export default function Patient() {
     }
   };
 
-  // delete patient image
   const handleImageDelete = async () => {
     if (!formData._id || !formData.image) return;
     try {
@@ -224,7 +221,6 @@ export default function Patient() {
     }
   };
 
-  // delete patient
   const handleDelete = async (id) => {
     try {
       const confirm = await Swal.fire({
@@ -308,7 +304,13 @@ export default function Patient() {
                 <tr key={p._id}>
                   <td>
                     <img
-                      src={p.image ? p.image : patientM}
+                      src={
+                        p.image
+                          ? p.image
+                          : p.sex?.toLowerCase() === "female"
+                          ? patientF
+                          : patientM
+                      }
                       alt={p.name}
                       className="patient-table-img"
                     />
@@ -360,7 +362,6 @@ export default function Patient() {
         </table>
       )}
 
-      {/* Pagination */}
       <div className="patients-pagination">
         <button disabled={pageNo === 0} onClick={() => setPageNo((p) => p - 1)}>
           Prev
@@ -376,7 +377,6 @@ export default function Patient() {
         </button>
       </div>
 
-      {/* Modal for Add/Edit */}
       {modalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -386,10 +386,17 @@ export default function Patient() {
               <div className="patient-modal-img-wrapper">
                 <div className="patient-img-overlay" />
                 <img
-                  src={formData.image ? formData.image : patientM}
+                  src={
+                    formData.image
+                      ? formData.image
+                      : formData.sex?.toLowerCase() === "female"
+                      ? patientF
+                      : patientM
+                  }
                   alt="patient"
                   className="patient-modal-img"
                 />
+
                 {formData.image && (
                   <FaTrash
                     className="image-delete-btn"
@@ -496,13 +503,6 @@ export default function Patient() {
                     onChange={handleChange}
                   />
                 ))}
-                {/* 
-                <textarea
-                  name="address"
-                  placeholder="Address"
-                  value={formData.address}
-                  onChange={handleChange}
-                /> */}
               </div>
 
               <div className="modal-actions">
@@ -525,14 +525,19 @@ export default function Patient() {
         </div>
       )}
 
-      {/* View Details Modal */}
       {viewModalOpen && selectedPatient && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>Patient Details</h3>
             <div className="patient-image">
               <img
-                src={selectedPatient.image || patientM}
+                src={
+                  selectedPatient.image
+                    ? selectedPatient.image
+                    : selectedPatient.sex?.toLowerCase() === "female"
+                    ? patientF
+                    : patientM
+                }
                 alt={selectedPatient.name}
               />
             </div>
