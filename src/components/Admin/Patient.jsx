@@ -35,6 +35,7 @@ export default function Patient() {
     slotid: "",
     starttime: "",
     endtime: "",
+    slottype: "offline",
   });
 
   const parseTime = (timeStr) => {
@@ -63,11 +64,13 @@ export default function Patient() {
     const e = parseTime(end);
     const now = new Date();
     const isToday = date === today;
+
     while (s < e) {
-      if (!isToday || s > now) out.push(formatTime(s));
+      if (!isToday || s > now) out.push(formatTime(new Date(s)));
       s.setMinutes(s.getMinutes() + 7);
     }
-    setIntervals(out);
+
+    return out;
   };
 
   function defaultForm() {
@@ -144,32 +147,6 @@ export default function Patient() {
     })();
   }, []);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     if (!appointmentForm.doctorid || !appointmentForm.date) return;
-  //     const res = await fetch(
-  //       `${base_url}/api/user/slotbooking/${appointmentForm.doctorid}?date=${appointmentForm.date}`
-  //     );
-  //     const data = await res.json();
-  //     if (!data.error && data.data?.length) {
-  //       const slot = data.data[0];
-  //       setAppointmentForm((prev) => ({ ...prev, slotid: slot._id }));
-  //       generateIntervals(slot.starttime, slot.endtime, appointmentForm.date);
-
-  //       const bookedRes = await fetch(
-  //         `${base_url}/api/user/appointment?doctorid=${appointmentForm.doctorid}&date=${appointmentForm.date}`
-  //       );
-  //       const bookedData = await bookedRes.json();
-  //       if (!bookedData.error && bookedData.data?.appointments) {
-  //         const times = bookedData.data.appointments.map((appt) =>
-  //           formatTime(parseTime(appt.starttime))
-  //         );
-  //         setBookedTimes(times);
-  //       }
-  //     }
-  //   })();
-  // }, [appointmentForm.doctorid, appointmentForm.date]);
-
   useEffect(() => {
     (async () => {
       if (!appointmentForm.doctorid || !appointmentForm.date) {
@@ -185,11 +162,35 @@ export default function Patient() {
         const data = await res.json();
 
         if (!data.error && data.data?.length) {
-          const slot = data.data[0];
-          setAppointmentForm((prev) => ({ ...prev, slotid: slot._id }));
-          generateIntervals(slot.starttime, slot.endtime, appointmentForm.date);
+          const filteredSlots = data.data.filter(
+            (slot) => slot.slottype === appointmentForm.slottype
+          );
 
-          // fetch booked appointments
+          if (!filteredSlots.length) {
+            setIntervals([]);
+            setBookedTimes([]);
+            return;
+          }
+
+          let allIntervals = [];
+          filteredSlots.forEach((slot) => {
+            allIntervals = [
+              ...allIntervals,
+              ...generateIntervals(
+                slot.starttime,
+                slot.endtime,
+                appointmentForm.date
+              ),
+            ];
+          });
+
+          setIntervals(allIntervals);
+
+          setAppointmentForm((prev) => ({
+            ...prev,
+            slotid: filteredSlots[0]._id,
+          }));
+
           const bookedRes = await fetch(
             `${base_url}/api/user/appointment?doctorid=${appointmentForm.doctorid}&date=${appointmentForm.date}`
           );
@@ -203,7 +204,6 @@ export default function Patient() {
             setBookedTimes([]);
           }
         } else {
-          // 🟢 Reset slots if none found
           setIntervals([]);
           setBookedTimes([]);
         }
@@ -213,30 +213,11 @@ export default function Patient() {
         setBookedTimes([]);
       }
     })();
-  }, [appointmentForm.doctorid, appointmentForm.date]);
-
-  // const handleBookAppointment = async () => {
-  //   try {
-  //     const res = await fetch(`${base_url}/api/admin/appointment/create`, {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(appointmentForm),
-  //     });
-  //     const data = await res.json();
-  //     if (!data.error) {
-  //       Swal.fire("Success", "Appointment booked successfully!", "success");
-  //       setAppointmentModalOpen(false);
-  //     } else {
-  //       Swal.fire(
-  //         "Error",
-  //         data.message || "Failed to book appointment",
-  //         "error"
-  //       );
-  //     }
-  //   } catch (err) {
-  //     Swal.fire("Error", "Server error, try again later.", "error");
-  //   }
-  // };
+  }, [
+    appointmentForm.doctorid,
+    appointmentForm.date,
+    appointmentForm.slottype,
+  ]);
 
   const handleBookAppointment = async () => {
     try {
@@ -256,7 +237,6 @@ export default function Patient() {
           body: JSON.stringify({
             appointmentid: appointmentId,
             amount: appointmentForm.amount || 700,
-            // method: appointmentForm.method || "cash",
             patientid: appointmentForm.patientid,
           }),
         });
@@ -285,43 +265,6 @@ export default function Patient() {
       }
     } catch (err) {
       Swal.fire("Error", "Server error, try again later.", "error");
-    }
-  };
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !formData._id) return;
-
-    try {
-      if (formData.image) {
-        await fetch(`${base_url}/api/admin/patient/singleimage`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ _id: formData._id }),
-        });
-      }
-
-      const formDataUpload = new FormData();
-      formDataUpload.append("patientimage", file);
-
-      const res = await fetch(
-        `${base_url}/api/admin/patient/upload/${formData._id}`,
-        {
-          method: "POST",
-          body: formDataUpload,
-        }
-      );
-
-      const data = await res.json();
-      if (res.ok && !data.error) {
-        toast.success("Image uploaded successfully");
-        setFormData((prev) => ({ ...prev, image: data.imageUrl || file.name }));
-        fetchPatients();
-      } else {
-        toast.error(data.message || "Failed to upload image");
-      }
-    } catch (err) {
-      toast.error("Error uploading image");
     }
   };
 
@@ -547,14 +490,16 @@ export default function Patient() {
                         type="button"
                         className="full-details-button"
                         onClick={() => {
-                          setAppointmentForm({
+                          setAppointmentForm((prev) => ({
+                            ...prev,
                             patientid: p._id,
                             doctorid: doctors.length > 0 ? doctors[0]._id : "",
                             date: today,
                             slotid: "",
                             starttime: "",
                             endtime: "",
-                          });
+                            slottype: "offline",
+                          }));
 
                           setAppointmentModalOpen(true);
                         }}
@@ -904,6 +849,40 @@ export default function Patient() {
                 }))
               }
             />
+
+            <label>Consultation Type</label>
+            <div className="slot-radio-group">
+              <label>
+                <input
+                  type="radio"
+                  name="slottype"
+                  value="offline"
+                  checked={appointmentForm.slottype === "offline"}
+                  onChange={(e) =>
+                    setAppointmentForm((prev) => ({
+                      ...prev,
+                      slottype: e.target.value,
+                    }))
+                  }
+                />
+                Offline
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="slottype"
+                  value="online"
+                  checked={appointmentForm.slottype === "online"}
+                  onChange={(e) =>
+                    setAppointmentForm((prev) => ({
+                      ...prev,
+                      slottype: e.target.value,
+                    }))
+                  }
+                />
+                Online
+              </label>
+            </div>
 
             <label>Time Slot</label>
             <div className="slots">

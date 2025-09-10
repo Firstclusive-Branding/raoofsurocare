@@ -387,6 +387,21 @@
   border-color: var(--color-primary);
 }
 
+.appointment-modal .slot-radio-group {
+  display: flex;
+  gap: 1rem;
+  border: 1px solid var(--color-border);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.appointment-modal .slot-radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
 /* Slots container */
 .appointment-modal .slots {
   display: flex;

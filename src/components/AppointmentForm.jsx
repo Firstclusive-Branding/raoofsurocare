@@ -67,16 +67,15 @@ export default function AppointmentForm() {
     const e = parseTime(end);
 
     const now = new Date();
-
     const isToday = date === today;
 
     while (s < e) {
       if (!isToday || s > now) {
-        out.push(formatTime(s));
+        out.push(formatTime(new Date(s)));
       }
       s.setMinutes(s.getMinutes() + 7);
     }
-    setIntervals(out);
+    return out;
   };
 
   useEffect(() => {
@@ -117,7 +116,6 @@ export default function AppointmentForm() {
     }
   };
 
-  // Fetch slots for selected doctor/date
   useEffect(() => {
     (async () => {
       if (!form.doctorid || !form.date) {
@@ -129,16 +127,39 @@ export default function AppointmentForm() {
           `${base_url}/api/user/slotbooking/${form.doctorid}?date=${form.date}`
         );
         const data = await res.json();
+
         if (!data.error && data.data?.length) {
-          const slot = data.data[0];
+          // filter slots by selected slottype
+          const filteredSlots = data.data.filter(
+            (slot) => slot.slottype === form.slottype
+          );
+
+          if (!filteredSlots.length) {
+            setIntervals([]);
+            setBookedTimes([]);
+            setMessage("No slots available for this type on this date.");
+            return;
+          }
+
+          // gather intervals from all matching slots
+          let allIntervals = [];
+          filteredSlots.forEach((slot) => {
+            allIntervals = [
+              ...allIntervals,
+              ...generateIntervals(slot.starttime, slot.endtime, form.date),
+            ];
+          });
+
+          setIntervals(allIntervals);
+          setMessage("");
+
+          // set default slotid to first available one
           setForm((prev) => ({
             ...prev,
-            slotid: slot._id,
-            slottype: slot.slottype,
+            slotid: filteredSlots[0]._id,
+            slottype: filteredSlots[0].slottype,
           }));
-          generateIntervals(slot.starttime, slot.endtime, form.date);
 
-          setMessage("");
           await fetchBookedAppointments(form.doctorid, form.date);
         } else {
           setIntervals([]);
@@ -152,8 +173,7 @@ export default function AppointmentForm() {
         setMessage("Unable to fetch slots. Please try again later.");
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.doctorid, form.date]);
+  }, [form.doctorid, form.date, form.slottype]);
 
   // Handlers
   const onChange = (e) =>
@@ -457,6 +477,31 @@ export default function AppointmentForm() {
               onChange={onChange}
               required
             />
+          </motion.div>
+
+          <motion.div className="af-form-control af-radio" variants={fade}>
+            <div className="af-radio-group">
+              <input
+                type="radio"
+                id="slottype-offline"
+                name="slottype"
+                value="offline"
+                checked={form.slottype === "offline"}
+                onChange={onChange}
+              />
+              <label htmlFor="slottype-offline">Offline</label>
+            </div>
+            <div className="af-radio-group">
+              <input
+                type="radio"
+                id="slottype-online"
+                name="slottype"
+                value="online"
+                checked={form.slottype === "online"}
+                onChange={onChange}
+              />
+              <label htmlFor="slottype-online">Online</label>
+            </div>
           </motion.div>
 
           <motion.div className="af-form-control" variants={fade}>
