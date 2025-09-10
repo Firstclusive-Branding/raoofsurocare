@@ -25,6 +25,7 @@ export default function AppointmentForm() {
   const [bookedTimes, setBookedTimes] = useState([]);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState([]);
 
   const today = useMemo(() => new Date().toISOString().split("T")[0], []);
   const [form, setForm] = useState({
@@ -39,13 +40,8 @@ export default function AppointmentForm() {
     slottype: "offline",
   });
 
-  // Helpers
   const parseTime = (timeStr) => {
-    const [time, modifier] = timeStr.split(" ");
-    let [hours, minutes] = time.split(":").map(Number);
-    if (modifier === "PM" && hours !== 12) hours += 12;
-    if (modifier === "AM" && hours === 12) hours = 0;
-
+    const [hours, minutes] = timeStr.split(":").map(Number);
     const d = new Date();
     d.setHours(hours, minutes, 0, 0);
     return d;
@@ -61,7 +57,7 @@ export default function AppointmentForm() {
       .replace("am", "AM")
       .replace("pm", "PM");
 
-  const generateIntervals = (start, end, date) => {
+  const generateIntervals = (start, end, date, slotRange = 7) => {
     const out = [];
     const s = parseTime(start);
     const e = parseTime(end);
@@ -71,10 +67,14 @@ export default function AppointmentForm() {
 
     while (s < e) {
       if (!isToday || s > now) {
-        out.push(formatTime(new Date(s)));
+        out.push({
+          display: formatTime(new Date(s)),
+          value: s.toISOString().slice(11, 16),
+        });
       }
-      s.setMinutes(s.getMinutes() + 7);
+      s.setMinutes(s.getMinutes() + (slotRange || 7));
     }
+
     return out;
   };
 
@@ -85,7 +85,11 @@ export default function AppointmentForm() {
         const data = await res.json();
         if (!data.error && data.data?.length) {
           setDoctors(data.data);
-          setForm((prev) => ({ ...prev, doctorid: data.data[0]._id }));
+          setForm((prev) => ({
+            ...prev,
+            doctorid: data.data[0]._id,
+            slottype: form.slottype,
+          }));
         } else {
           setMessage("No doctors available right now.");
         }
@@ -103,16 +107,11 @@ export default function AppointmentForm() {
       );
       const data = await res.json();
       if (!data.error && data.data?.appointments) {
-        const times = data.data.appointments.map((appt) =>
-          formatTime(parseTime(appt.starttime))
-        );
-        setBookedTimes(times);
-      } else {
-        setBookedTimes([]);
+        return data.data.appointments.map((appt) => appt.starttime);
       }
-    } catch (err) {
-      console.error(err);
-      setBookedTimes([]);
+      return [];
+    } catch {
+      return [];
     }
   };
 
@@ -129,7 +128,6 @@ export default function AppointmentForm() {
         const data = await res.json();
 
         if (!data.error && data.data?.length) {
-          // filter slots by selected slottype
           const filteredSlots = data.data.filter(
             (slot) => slot.slottype === form.slottype
           );
@@ -141,26 +139,50 @@ export default function AppointmentForm() {
             return;
           }
 
-          // gather intervals from all matching slots
+          // ✅ generate all intervals
           let allIntervals = [];
           filteredSlots.forEach((slot) => {
             allIntervals = [
               ...allIntervals,
-              ...generateIntervals(slot.starttime, slot.endtime, form.date),
+              ...generateIntervals(
+                slot.starttime,
+                slot.endtime,
+                form.date,
+                slot.slottimerange ? parseInt(slot.slottimerange, 10) : 7
+              ),
             ];
           });
 
           setIntervals(allIntervals);
+          setAvailableSlots(filteredSlots);
           setMessage("");
 
-          // set default slotid to first available one
+          // ✅ now mark break times
+          let breakTimes = [];
+          filteredSlots.forEach((slot) => {
+            slot.breaks?.forEach((b) => {
+              const bs = parseTime(b.breakstart);
+              const be = parseTime(b.breakend);
+              allIntervals.forEach(({ value }) => {
+                const t = parseTime(value);
+                if (t >= bs && t < be) {
+                  breakTimes.push(value);
+                }
+              });
+            });
+          });
+
           setForm((prev) => ({
             ...prev,
             slotid: filteredSlots[0]._id,
             slottype: filteredSlots[0].slottype,
           }));
 
-          await fetchBookedAppointments(form.doctorid, form.date);
+          const apptTimes = await fetchBookedAppointments(
+            form.doctorid,
+            form.date
+          );
+          setBookedTimes([...new Set([...breakTimes, ...apptTimes])]);
         } else {
           setIntervals([]);
           setBookedTimes([]);
@@ -175,17 +197,29 @@ export default function AppointmentForm() {
     })();
   }, [form.doctorid, form.date, form.slottype]);
 
-  // Handlers
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  const onSelectInterval = (time) => {
-    const start = parseTime(time);
-    const end = new Date(start.getTime() + 7 * 60000);
+  const onSelectInterval = ({ display, value }) => {
+    const start = parseTime(value);
+
+    const matchedSlot = availableSlots.find((slot) => {
+      const start = parseTime(slot.starttime);
+      const end = parseTime(slot.endtime);
+      const current = parseTime(value);
+      return current >= start && current < end;
+    });
+
+    const step = matchedSlot?.slottimerange
+      ? parseInt(matchedSlot.slottimerange, 10)
+      : 7;
+    const end = new Date(start.getTime() + step * 60000);
+
     setForm((prev) => ({
       ...prev,
-      starttime: formatTime(start),
-      endtime: formatTime(end),
+      slotid: matchedSlot?._id || prev.slotid,
+      starttime: value,
+      endtime: end.toISOString().slice(11, 16),
     }));
   };
 
@@ -239,7 +273,11 @@ export default function AppointmentForm() {
               icon: "success",
               confirmButtonText: "OK",
             });
-            await fetchBookedAppointments(form.doctorid, form.date);
+            await fetchBookedAppointments(form.doctorid, form.date).then(
+              (apptTimes) => {
+                setBookedTimes((prev) => [...new Set([...prev, ...apptTimes])]);
+              }
+            );
 
             setForm((f) => ({
               ...f,
@@ -318,13 +356,12 @@ export default function AppointmentForm() {
 
       const appointmentId = data.data._id;
 
-      // 2) Create Razorpay order
       const orderRes = await fetch(`${base_url}/api/user/payment/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           appointmentid: appointmentId,
-          amount: 700, // in INR; backend should convert to paise
+          amount: 700,
         }),
       });
       const orderData = await orderRes.json();
@@ -352,7 +389,6 @@ export default function AppointmentForm() {
     }
   };
 
-  // Animations
   const fade = {
     hidden: { opacity: 0, y: 12 },
     show: { opacity: 1, y: 0, transition: { duration: 0.45 } },
@@ -366,7 +402,6 @@ export default function AppointmentForm() {
       aria-labelledby="book-title"
     >
       <div className="af-container">
-        {/* LEFT: Content */}
         <motion.div
           className="af-left"
           initial={{ opacity: 0, y: 14 }}
@@ -507,29 +542,31 @@ export default function AppointmentForm() {
           <motion.div className="af-form-control" variants={fade}>
             <label>Preferred Time</label>
             <div className="af-slots-container">
-              {intervals.length === 0 ? (
-                <span className="af-text-muted">No intervals available.</span>
-              ) : (
-                intervals.map((time) => {
-                  const selected = form.starttime === time;
-                  const booked = bookedTimes.includes(time);
-                  return (
-                    <button
-                      key={time}
-                      type="button"
-                      onClick={() => !booked && onSelectInterval(time)}
-                      className={`af-slot-btn ${selected ? "selected" : ""} ${
-                        booked ? "disabled" : ""
-                      }`}
-                      disabled={booked}
-                      aria-pressed={selected}
-                      aria-label={`Time ${time}${booked ? " (booked)" : ""}`}
-                    >
-                      <FaCalendarAlt style={{ marginRight: 6 }} /> {time}
-                    </button>
-                  );
-                })
-              )}
+              {intervals.length === 0
+                ? null
+                : intervals.map(({ display, value }) => {
+                    const selected = form.starttime === value;
+                    const booked = bookedTimes.includes(value);
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() =>
+                          !booked && onSelectInterval({ display, value })
+                        }
+                        className={`af-slot-btn ${selected ? "selected" : ""} ${
+                          booked ? "disabled" : ""
+                        }`}
+                        disabled={booked}
+                        aria-pressed={selected}
+                        aria-label={`Time ${display}${
+                          booked ? " (booked)" : ""
+                        }`}
+                      >
+                        <FaCalendarAlt style={{ marginRight: 6 }} /> {display}
+                      </button>
+                    );
+                  })}
             </div>
           </motion.div>
 

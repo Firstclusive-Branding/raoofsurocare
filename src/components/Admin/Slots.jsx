@@ -29,8 +29,37 @@ export default function Slots() {
     endHour: "11",
     endMinute: "00",
     endPeriod: "AM",
+    slottimerange: "7",
     slottype: "offline",
+
+    breaks: [],
   });
+
+  // helpers
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toISOString().split("T")[0];
+  };
+
+  const parse24to12 = (timeStr) => {
+    if (!timeStr) return { hour: "10", minute: "00", period: "AM" };
+    const [h, m] = timeStr.split(":").map((v) => parseInt(v, 10));
+    let period = h >= 12 ? "PM" : "AM";
+    let hour = h % 12 === 0 ? 12 : h % 12;
+    return {
+      hour: String(hour).padStart(2, "0"),
+      minute: String(m).padStart(2, "0"),
+      period,
+    };
+  };
+
+  const convertTo24Hour = (hour, minute, period) => {
+    let h = parseInt(hour, 10);
+    if (period === "PM" && h !== 12) h += 12;
+    if (period === "AM" && h === 12) h = 0;
+    return `${String(h).padStart(2, "0")}:${minute}`;
+  };
 
   // Fetch Slots
   const fetchSlots = async (search = "", page = currentPage) => {
@@ -88,25 +117,11 @@ export default function Slots() {
     fetchSlots(searchTerm, currentPage);
   }, [currentPage]);
 
-  // Helpers
-  const formatDate = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
-    return d.toISOString().split("T")[0];
-  };
-
-  const parseTime = (timeStr) => {
-    if (!timeStr) return { hour: "10", minute: "00", period: "AM" };
-    const [time, period] = timeStr.split(" ");
-    const [hour, minute] = time.split(":");
-    return { hour, minute, period };
-  };
-
   const openModal = (slot = null) => {
     if (slot) {
       setIsEditing(true);
-      const start = parseTime(slot.starttime);
-      const end = parseTime(slot.endtime);
+      const start = parse24to12(slot.starttime);
+      const end = parse24to12(slot.endtime);
       setFormData({
         _id: slot._id,
         doctorid: slot.doctorid,
@@ -117,7 +132,20 @@ export default function Slots() {
         endHour: end.hour,
         endMinute: end.minute,
         endPeriod: end.period,
+        slottimerange: slot.slottimerange,
         slottype: slot.slottype,
+        breaks: slot.breaks.map((b) => {
+          const bs = parse24to12(b.breakstart);
+          const be = parse24to12(b.breakend);
+          return {
+            breakStartHour: bs.hour,
+            breakStartMinute: bs.minute,
+            breakStartPeriod: bs.period,
+            breakEndHour: be.hour,
+            breakEndMinute: be.minute,
+            breakEndPeriod: be.period,
+          };
+        }),
       });
     } else {
       setIsEditing(false);
@@ -131,7 +159,9 @@ export default function Slots() {
         endHour: "11",
         endMinute: "00",
         endPeriod: "AM",
+        slottimerange: "",
         slottype: "offline",
+        breaks: [],
       });
     }
     setModalOpen(true);
@@ -139,8 +169,30 @@ export default function Slots() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const starttime = `${formData.startHour}:${formData.startMinute} ${formData.startPeriod}`;
-    const endtime = `${formData.endHour}:${formData.endMinute} ${formData.endPeriod}`;
+
+    const starttime = convertTo24Hour(
+      formData.startHour,
+      formData.startMinute,
+      formData.startPeriod
+    );
+    const endtime = convertTo24Hour(
+      formData.endHour,
+      formData.endMinute,
+      formData.endPeriod
+    );
+
+    const breaks = formData.breaks.map((b) => ({
+      breakstart: convertTo24Hour(
+        b.breakStartHour,
+        b.breakStartMinute,
+        b.breakStartPeriod
+      ),
+      breakend: convertTo24Hour(
+        b.breakEndHour,
+        b.breakEndMinute,
+        b.breakEndPeriod
+      ),
+    }));
 
     const payload = {
       _id: formData._id,
@@ -149,6 +201,8 @@ export default function Slots() {
       starttime,
       endtime,
       slottype: formData.slottype,
+      slottimerange: formData.slottimerange,
+      breaks,
     };
 
     try {
@@ -215,7 +269,7 @@ export default function Slots() {
     return doc ? doc.name : "Unknown";
   };
 
-  // Time dropdowns
+  // dropdown values
   const hours = Array.from({ length: 12 }, (_, i) =>
     String(i + 1).padStart(2, "0")
   );
@@ -223,6 +277,46 @@ export default function Slots() {
     String(i).padStart(2, "0")
   );
   const periods = ["AM", "PM"];
+
+  const addBreak = () => {
+    setFormData({
+      ...formData,
+      breaks: [
+        ...formData.breaks,
+        {
+          breakStartHour: "12",
+          breakStartMinute: "00",
+          breakStartPeriod: "PM",
+          breakEndHour: "12",
+          breakEndMinute: "30",
+          breakEndPeriod: "PM",
+        },
+      ],
+    });
+  };
+
+  const updateBreak = (index, key, value) => {
+    const updated = [...formData.breaks];
+    updated[index][key] = value;
+    setFormData({ ...formData, breaks: updated });
+  };
+
+  const removeBreak = (index) => {
+    const updated = [...formData.breaks];
+    updated.splice(index, 1);
+    setFormData({ ...formData, breaks: updated });
+  };
+
+  const formatTo12Hour = (timeStr) => {
+    if (!timeStr) return "";
+    let [hour, minute] = timeStr.split(":").map(Number);
+    const period = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12; // convert 0 -> 12, 13 -> 1, etc.
+    return `${String(hour).padStart(2, "0")}:${String(minute).padStart(
+      2,
+      "0"
+    )} ${period}`;
+  };
 
   return (
     <div className="slots-container">
@@ -252,7 +346,9 @@ export default function Slots() {
                 <th>Date</th>
                 <th>Start</th>
                 <th>End</th>
+                <th>Slots Range</th>
                 <th>Type</th>
+                <th>Breaks</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -261,16 +357,28 @@ export default function Slots() {
                 <tr key={slot._id}>
                   <td>{getDoctorName(slot.doctorid)}</td>
                   <td>{new Date(slot.date).toLocaleDateString()}</td>
-                  <td>{slot.starttime}</td>
-                  <td>{slot.endtime}</td>
+                  <td>{formatTo12Hour(slot.starttime)}</td>
+                  <td>{formatTo12Hour(slot.endtime)}</td>
+                  <td>{slot.slottimerange || 7} minutes</td>
                   <td>{slot.slottype}</td>
                   <td>
+                    {slot.breaks && slot.breaks.length > 0
+                      ? slot.breaks.map((b, i) => (
+                          <div key={i}>
+                            {formatTo12Hour(b.breakstart)} -{" "}
+                            {formatTo12Hour(b.breakend)}
+                          </div>
+                        ))
+                      : "No breaks"}
+                  </td>
+
+                  <td>
                     <FaEdit
-                      className="icon edit"
+                      className="slots-icon slots-edit"
                       onClick={() => openModal(slot)}
                     />
                     <FaTrash
-                      className="icon delete"
+                      className="slots-icon slots-delete"
                       onClick={() => handleDelete(slot._id)}
                     />
                   </td>
@@ -279,7 +387,6 @@ export default function Slots() {
             </tbody>
           </table>
 
-          {/* Pagination */}
           <div className="slots-pagination">
             <button
               disabled={currentPage === 0}
@@ -300,7 +407,6 @@ export default function Slots() {
         </>
       )}
 
-      {/* Modal */}
       {modalOpen && (
         <div className="slots-modal">
           <div className="slots-modal-content">
@@ -331,7 +437,7 @@ export default function Slots() {
               />
 
               <label>Start Time</label>
-              <div className="time-group">
+              <div className="slots-time-group">
                 <select
                   value={formData.startHour}
                   onChange={(e) =>
@@ -365,7 +471,7 @@ export default function Slots() {
               </div>
 
               <label>End Time</label>
-              <div className="time-group">
+              <div className="slots-time-group">
                 <select
                   value={formData.endHour}
                   onChange={(e) =>
@@ -398,6 +504,15 @@ export default function Slots() {
                 </select>
               </div>
 
+              <input
+                type="number"
+                value={formData.slottimerange}
+                onChange={(e) =>
+                  setFormData({ ...formData, slottimerange: e.target.value })
+                }
+                placeholder="Slot Time Range (in minutes)"
+              />
+
               <select
                 value={formData.slottype}
                 onChange={(e) =>
@@ -407,6 +522,93 @@ export default function Slots() {
                 <option value="online">Online</option>
                 <option value="offline">Offline</option>
               </select>
+
+              <div className="slots-breaks-container">
+                <h4>Breaks</h4>
+                {formData.breaks.map((b, i) => (
+                  <div key={i} className="slots-break-row">
+                    <div className="slots-time-group break">
+                      <select
+                        value={b.breakStartHour}
+                        onChange={(e) =>
+                          updateBreak(i, "breakStartHour", e.target.value)
+                        }
+                      >
+                        {hours.map((h) => (
+                          <option key={h}>{h}</option>
+                        ))}
+                      </select>
+                      :
+                      <select
+                        value={b.breakStartMinute}
+                        onChange={(e) =>
+                          updateBreak(i, "breakStartMinute", e.target.value)
+                        }
+                      >
+                        {minutes.map((m) => (
+                          <option key={m}>{m}</option>
+                        ))}
+                      </select>
+                      :
+                      <select
+                        value={b.breakStartPeriod}
+                        onChange={(e) =>
+                          updateBreak(i, "breakStartPeriod", e.target.value)
+                        }
+                      >
+                        {periods.map((p) => (
+                          <option key={p}>{p}</option>
+                        ))}
+                      </select>
+                    </div>
+                    -
+                    <div className="slots-time-group break">
+                      <select
+                        value={b.breakEndHour}
+                        onChange={(e) =>
+                          updateBreak(i, "breakEndHour", e.target.value)
+                        }
+                      >
+                        {hours.map((h) => (
+                          <option key={h}>{h}</option>
+                        ))}
+                      </select>
+                      :
+                      <select
+                        value={b.breakEndMinute}
+                        onChange={(e) =>
+                          updateBreak(i, "breakEndMinute", e.target.value)
+                        }
+                      >
+                        {minutes.map((m) => (
+                          <option key={m}>{m}</option>
+                        ))}
+                      </select>
+                      :
+                      <select
+                        value={b.breakEndPeriod}
+                        onChange={(e) =>
+                          updateBreak(i, "breakEndPeriod", e.target.value)
+                        }
+                      >
+                        {periods.map((p) => (
+                          <option key={p}>{p}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      className="slots-break-remove"
+                      onClick={() => removeBreak(i)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={addBreak}>
+                  + Add Break
+                </button>
+              </div>
 
               <div className="slots-actions">
                 <button type="submit">{isEditing ? "Update" : "Create"}</button>

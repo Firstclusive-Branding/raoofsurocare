@@ -481,7 +481,12 @@ export default function Patient() {
                   <td>{p.name}</td>
                   <td>{p.mobile}</td>
                   <td>{p.age}</td>
-                  <td>{p.sex}</td>
+                  <td>
+                    {p.sex
+                      ? p.sex.charAt(0).toUpperCase() + p.sex.slice(1)
+                      : ""}
+                  </td>
+
                   <td>{p.email}</td>
                   <td>{p.area}</td>
                   <td>

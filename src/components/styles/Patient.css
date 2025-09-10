@@ -100,6 +100,11 @@
   color: #fff;
   font-size: 0.9rem;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.full-details-button:hover {
+  background-color: var(--color-link-hover);
 }
 
 .action-btn {
@@ -312,16 +317,20 @@
   font-size: 0.9rem;
   cursor: pointer;
   border: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 .modal-actions button[type="submit"] {
-  background: var(--color-primary);
+  background-color: var(--color-primary);
   color: #fff;
 }
 
 .modal-actions button[type="button"] {
-  background: var(--color-surface);
+  background-color: var(--color-surface);
   color: var(--color-text);
+}
+
+.modal-actions button:hover {
+  background: var(--color-border);
 }
 
 .details-grid {
@@ -445,7 +454,6 @@
   border-color: #ccc;
 }
 
-/* Actions */
 .appointment-modal .modal-actions {
   display: flex;
   justify-content: flex-end;
