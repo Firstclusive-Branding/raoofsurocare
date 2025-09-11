@@ -23,7 +23,6 @@ export default function AppointmentForm() {
   const [doctors, setDoctors] = useState([]);
   const [intervals, setIntervals] = useState([]);
   const [bookedTimes, setBookedTimes] = useState([]);
-  const [breakTimes, setBreakTimes] = useState([]);
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -188,7 +187,6 @@ export default function AppointmentForm() {
             form.doctorid,
             form.date
           );
-          setBreakTimes(breaksTemp);
           setBookedTimes([...new Set([...apptTimes, ...breaksTemp])]);
           setMessage("");
         } else {
@@ -531,41 +529,45 @@ export default function AppointmentForm() {
           <motion.div className="af-form-control" variants={fade}>
             <label>Preferred Time</label>
             <div className="af-slots-container">
-              {intervals.length === 0
-                ? null
-                : intervals.map((time) => {
-                    const selected = form.starttime === time;
-                    const booked = bookedTimes.includes(time);
-                    return (
-                      <button
-                        key={time}
-                        type="button"
-                        onClick={() => {
-                          if (!booked) {
-                            const start = parseTime(time);
-                            const slotDuration = parseInt(
-                              availableSlots[0]?.slottimerange || 7,
-                              10
-                            );
-                            const end = new Date(
-                              start.getTime() + slotDuration * 60000
-                            );
-                            setForm((prev) => ({
-                              ...prev,
-                              starttime: formatTime(start),
-                              endtime: formatTime(end),
-                            }));
-                          }
-                        }}
-                        className={`af-slot-btn ${selected ? "selected" : ""} ${
-                          booked ? "disabled" : ""
-                        }`}
-                        disabled={booked}
-                      >
-                        <FaCalendarAlt /> {time}
-                      </button>
-                    );
-                  })}
+              {intervals.length === 0 ? (
+                <span className="no-slots">
+                  No slots available on this date
+                </span>
+              ) : (
+                intervals.map((time) => {
+                  const selected = form.starttime === time;
+                  const booked = bookedTimes.includes(time);
+                  return (
+                    <button
+                      key={time}
+                      type="button"
+                      onClick={() => {
+                        if (!booked) {
+                          const start = parseTime(time);
+                          const slotDuration = parseInt(
+                            availableSlots[0]?.slottimerange || 7,
+                            10
+                          );
+                          const end = new Date(
+                            start.getTime() + slotDuration * 60000
+                          );
+                          setForm((prev) => ({
+                            ...prev,
+                            starttime: formatTime(start),
+                            endtime: formatTime(end),
+                          }));
+                        }
+                      }}
+                      className={`af-slot-btn ${selected ? "selected" : ""} ${
+                        booked ? "disabled" : ""
+                      }`}
+                      disabled={booked}
+                    >
+                      <FaCalendarAlt /> {time}
+                    </button>
+                  );
+                })
+              )}
             </div>
           </motion.div>
 

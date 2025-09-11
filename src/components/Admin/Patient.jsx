@@ -41,12 +41,21 @@ export default function Patient() {
   const [availableSlots, setAvailableSlots] = useState([]);
 
   const parseTime = (timeStr) => {
-    const [time, modifier] = timeStr.split(" ");
-    let [hours, minutes] = time.split(":").map(Number);
-    if (modifier === "PM" && hours !== 12) hours += 12;
-    if (modifier === "AM" && hours === 12) hours = 0;
+    if (!timeStr) return new Date();
+
+    if (timeStr.includes("AM") || timeStr.includes("PM")) {
+      const [time, modifier] = timeStr.split(" ");
+      let [hours, minutes] = time.split(":").map(Number);
+      if (modifier === "PM" && hours !== 12) hours += 12;
+      if (modifier === "AM" && hours === 12) hours = 0;
+      const d = new Date();
+      d.setHours(hours, minutes, 0, 0);
+      return d;
+    }
+
+    const parts = timeStr.split(":").map(Number);
     const d = new Date();
-    d.setHours(hours, minutes, 0, 0);
+    d.setHours(parts[0], parts[1] || 0, parts[2] || 0, 0);
     return d;
   };
 
@@ -186,7 +195,7 @@ export default function Patient() {
               slot.starttime,
               slot.endtime,
               appointmentForm.date,
-              parseInt(slot.slottimerange, 10)
+              parseInt(slot.slottimerange, 10) || 7
             );
 
             allIntervals = [...allIntervals, ...intervals];
