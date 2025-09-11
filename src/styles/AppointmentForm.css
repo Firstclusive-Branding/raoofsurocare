@@ -66,9 +66,6 @@
   width: min(520px, 100%);
   height: auto;
   border-radius: 16px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
 }
 
 .af-form {
