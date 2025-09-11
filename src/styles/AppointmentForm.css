@@ -167,6 +167,12 @@
   cursor: not-allowed;
 }
 
+.af-slot-btn.disabled:hover,
+.af-slot-btn:disabled:hover {
+  transform: none;
+  border-color: var(--color-border);
+}
+
 .af-status {
   margin-top: 0.25rem;
   font-size: 0.95rem;
